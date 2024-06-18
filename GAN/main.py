@@ -26,8 +26,11 @@ if __name__ == "__main__":
 	rgb_array = first_item[:3, :, :]
 	depth_array = first_item[3:,:,:]
 
-	d.show()
+	to_pil = transforms.ToPILImage()
+	d_reconstructed = to_pil(depth_array)
 
-	#d_t = np.transpose(d.numpy(), (1,2,0))
-	# image = Image.fromarray(d.numpy(), 'RGB')
-	# image.show()
+	# Show the reconstructed image
+	d_reconstructed.show()
+
+	rgb_recon = to_pil(rgb_array)
+	rgb_recon.show()
