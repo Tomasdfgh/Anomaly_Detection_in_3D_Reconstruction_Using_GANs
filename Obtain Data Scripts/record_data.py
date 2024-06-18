@@ -9,6 +9,8 @@ import pixel_change as pc
 import numpy as np
 import open3d as o3d
 
+import general_functions as gf
+
 
 def run_cmd_commands(commands, working_dir=None):
     for command in commands:
@@ -251,6 +253,9 @@ if __name__ == "__main__":
     #Renaming Files in RGB
     folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images'
     rename_files_in_folder(folder_path, count)
+
+    #Filter out data's background
+    gf.iterate_files_filter(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images',r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images', r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images')
 
     #Delete Original Image Directory
     folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data'
