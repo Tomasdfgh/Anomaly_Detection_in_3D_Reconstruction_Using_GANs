@@ -24,13 +24,12 @@ class ConvertData(Dataset):
 
 		rgb_image = self.transform(rgb_image)
 
-
 		depth_image = transforms.ToTensor()(depth_image)
 		depth_image = transforms.Normalize((0.5,),(0.5,))(depth_image)
 
 		combined_image = torch.cat((rgb_image, depth_image), dim = 0)
 
-		return combined_image, rgb_image, depth_image
+		return combined_image
 
 
 def load_data(rgb_link, depth_link, dataset):
