@@ -1,1 +1,1 @@
-# Anomaly_Detection_in_3D_Reconstruction_Using_GANs
+# Anomaly Detection in 3D Reconstruction Using GANs
