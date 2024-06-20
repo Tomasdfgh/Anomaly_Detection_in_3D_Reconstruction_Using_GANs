@@ -40,14 +40,36 @@ class Generator(nn.Module):
 	def __init__(self, z_dim):
 		super().__init__()
 
-		self.FulCon1 = nn.Linear(z_dim, 256)
-		self.FulCon2 = nn.Linear(256, 4 * 108 * 192)
+		self.FulCon1 = nn.Linear(z_dim, 512 * 27 * 48)
+		self.BatchNorm1 = nn.BatchNorm1d(512 * 27 * 48)
+		self.unFlatten1 = nn.Unflatten(1, (512, 27, 48))
+
+		self.convTrans1 = nn.ConvTranspose2d(512, 256, kernel_size = 3, stride = 2, padding = 1)
+		self.BatchNorm2 = nn.BatchNorm2d(256)
+
+		self.convTrans2 = nn.ConvTranspose2d(256, 128, kernel_size = 3, stride = 2, padding = 1)
+		self.BatchNorm3 = nn.BatchNorm2d(128)
+
+		self.convTrans3 = nn.ConvTranspose2d(128, 64, kernel_size = 4, stride = 1, padding = 1)
+		self.BatchNorm4 = nn.BatchNorm2d(64)
+
+		self.convTrans4 = nn.ConvTranspose2d(64, 4, kernel_size = 3, stride = 1, padding = 1)
+		self.convTrans5 = nn.ConvTranspose2d(4, 4, kernel_size=3, stride=1, padding=0)
 
 		self.tanh = nn.Tanh()
 
 	def forward(self, x):
 
-		x = F.leaky_relu(self.FulCon1(x), negative_slope = 0.01)
-		x = self.tanh(self.FulCon2(x))
+		if x.size(0) > 1:
+			x = self.unFlatten1(self.BatchNorm1(F.leaky_relu(self.FulCon1(x), negative_slope = 0.01)))
 
+		else:
+			x = self.unFlatten1(F.leaky_relu(self.FulCon1(x), negative_slope = 0.01))
+
+		x = self.BatchNorm2(F.leaky_relu(self.convTrans1(x), negative_slope = 0.01))
+		x = self.BatchNorm3(F.leaky_relu(self.convTrans2(x), negative_slope = 0.01))
+		x = self.BatchNorm4(F.leaky_relu(self.convTrans3(x), negative_slope = 0.01))
+		x = F.leaky_relu(self.convTrans4(x), negative_slope=0.01)
+		x = self.tanh(self.convTrans5(x))
+		
 		return x

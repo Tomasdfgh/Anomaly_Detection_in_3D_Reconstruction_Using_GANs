@@ -11,11 +11,13 @@ import os
 from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 from PIL import Image
+import open3d as o3d
 
 #Local Files
 import loadData as ld
 import model as md
 import training as tr
+import view_3d as v3
 
 
 np.set_printoptions(threshold=np.inf, linewidth=np.inf)
@@ -31,9 +33,14 @@ if __name__ == "__main__":
 		transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 	])
 
-	denormalize = transforms.Normalize(
+	denormalize_rgb = transforms.Normalize(
 		mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
 		std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
+	)
+
+	denormalize_depth = transforms.Normalize(
+	mean=[-0.5 / 0.5],
+	std=[1 / 0.5]
 	)
 
 	to_pil = transforms.ToPILImage()
@@ -48,10 +55,17 @@ if __name__ == "__main__":
 	disc = md.Discriminator()
 	gen = md.Generator(z_dim)
 
+	#Load Existing Model
+	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative.pth"
+	Disc_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Discriminator.pth"
+	gen.load_state_dict(torch.load(Generative_filepath))
+	disc.load_state_dict(torch.load(Disc_filepath))
+
+
 	#Setting up the Data
 	dataset = ld.load_data(rgb_link, depth_link, [])
 	ImageSet = ld.ConvertData(dataset, transform = transform)
-	
+
 	#Converting Data to Dataloader
 	train_loader = torch.utils.data.DataLoader(ImageSet, batch_size = batch_size, shuffle = True)
 
