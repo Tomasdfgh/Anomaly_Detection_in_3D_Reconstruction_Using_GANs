@@ -53,10 +53,7 @@ if __name__ == "__main__":
 	ImageSet = ld.ConvertData(dataset, transform = transform)
 	
 	#Converting Data to Dataloader
-	train_set, valid_set, test_set = torch.utils.data.random_split(ImageSet, [int(0.8 * len(ImageSet)), int(0.1 * len(ImageSet)), len(ImageSet) - int(0.8 * len(ImageSet)) - int(0.1 * len(ImageSet))])
-	train_loader = torch.utils.data.DataLoader(train_set, batch_size = batch_size, shuffle = True)
-	validation_loader = torch.utils.data.DataLoader(valid_set, batch_size = batch_size, shuffle = True)
-	test_loader = torch.utils.data.DataLoader(test_set, batch_size = batch_size, shuffle = True)
+	train_loader = torch.utils.data.DataLoader(ImageSet, batch_size = batch_size, shuffle = True)
 
 	#Optimizers and Criterion
 	opt_disc = optim.Adam(disc.parameters(), lr = lr)
@@ -64,4 +61,4 @@ if __name__ == "__main__":
 	criterion = nn.BCELoss()
 
 	#Begin Training
-	tr.training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_loader, validation_loader, test_loader)
+	tr.training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_loader)

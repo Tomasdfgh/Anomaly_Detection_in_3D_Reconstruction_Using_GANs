@@ -5,24 +5,40 @@ import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+from IPython.display import clear_output
 import numpy as np
 import os
 from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 from PIL import Image
 
-to_pil = transforms.ToPILImage()
+def show_sample_from_generator(gen, z_dim, batch_size):
 
-denormalize = transforms.Normalize(
-	mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
-	std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
-)
+	to_pil = transforms.ToPILImage()
 
-#to_pil(denormalize(real[:3, :, :])).show()
+	denormalize = transforms.Normalize(
+		mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
+		std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
+	)
+
+	noise = torch.rand(batch_size, z_dim).to(next(gen.parameters()).device)
+	with torch.no_grad():
+		fake_gen = gen(noise).cpu()
+	fake_gen = fake_gen.view(4, 108, 192)
+	print(fake_gen.shape)
+	rgb_tensor = fake_gen[:3, :, :]
+	data_new = to_pil(denormalize(rgb_tensor))
+	data_new.show()
 
 
+def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_set):
 
-def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_set, valid_set, test_set):
+	D_loss = []
+	G_loss = []
+	batch_num = []
+
+	plt.ion()
+	fig, ax = plt.subplots()
 
 	for epoch in range(num_epochs):
 
@@ -52,5 +68,29 @@ def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, cr
 			gen_loss.backward()
 			opt_gen.step()
 
+			#Adding Losses to array for plotting
+			D_loss.append(disc_loss.detach())
+			G_loss.append(gen_loss.detach())
+			batch_num.append(len(batch_num) + 1)
+
 			if idx % 5 == 0:
-				print(f"Epoch [{epoch + 1}/{num_epochs}] Batch {idx + 1}/{len(train_set)} Loss D: {disc_loss:.4f}, loss G: {gen_loss:.4f}")
+				print(f"Epoch [{epoch + 1}/{num_epochs}] Batch {idx}/{len(train_set)} Loss D: {disc_loss:.4f}, loss G: {gen_loss:.4f}")
+
+				clear_output(wait = True)
+
+				ax.clear()
+
+				ax.plot(batch_num, D_loss, label = 'Discriminator Loss', color = 'red')
+				ax.plot(batch_num, G_loss, label = 'Generator Loss', color = 'blue')
+
+				ax.set_xlabel('Batch Number')
+				ax.set_ylabel('Loss')
+				ax.legend()
+				plt.show()
+				plt.pause(0.001)
+
+		#-------------Show a sample of the Generative Model-------------#
+		show_sample_from_generator(gen, z_dim, 1)
+
+	plt.ioff()
+	plt.show()
