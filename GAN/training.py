@@ -21,26 +21,38 @@ denormalize = transforms.Normalize(
 )
 
 def show_sample_from_generator(gen, z_dim, batch_size):
-    def show_image():
-        noise = torch.rand(batch_size, z_dim).to(next(gen.parameters()).device)
-        with torch.no_grad():
-            fake_gen = gen(noise).cpu()
-        fake_gen = fake_gen.view(4, 108, 192)
-        rgb_tensor = fake_gen[:3, :, :]
-        data_new = to_pil(denormalize(rgb_tensor))
-        data_new.show()
 
-    thread = threading.Thread(target=show_image)
-    thread.start()
+	to_pil = transforms.ToPILImage()
+
+	denormalize = transforms.Normalize(
+		mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
+		std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
+	)
+
+	def show_image():
+		noise = torch.rand(batch_size, z_dim).to(next(gen.parameters()).device)
+		with torch.no_grad():
+			fake_gen = gen(noise).cpu()
+		fake_gen = fake_gen.view(4, 108, 192)
+		rgb_tensor = fake_gen[:3, :, :]
+		data_new = to_pil(denormalize(rgb_tensor))
+		data_new.show()
+
+	thread = threading.Thread(target=show_image)
+	thread.start()
 
 
-def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_set):
+def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_set, Generative_filepath, Disc_filepath):
 
 	D_loss = []
 	G_loss = []
 	batch_num = []
 
 	for epoch in range(num_epochs):
+
+		#-------------Show a sample of the Generative Model-------------#
+		show_sample_from_generator(gen, z_dim, 1)
+
 
 		for idx, real in enumerate(train_set):
 
@@ -89,8 +101,11 @@ def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, cr
 				plt.legend()
 				plt.pause(0.001)
 
-		#-------------Show a sample of the Generative Model-------------#
-		show_sample_from_generator(gen, z_dim, 1)
+
+		#Save Model
+		torch.save(gen.state_dict(), Generative_filepath)
+		torch.save(disc.state_dict(), Disc_filepath)
+
 
 	plt.ioff()
 	plt.show()

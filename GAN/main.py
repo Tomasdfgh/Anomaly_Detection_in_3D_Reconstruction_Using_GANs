@@ -75,4 +75,4 @@ if __name__ == "__main__":
 	criterion = nn.BCELoss()
 
 	#Begin Training
-	tr.training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_loader)
+	tr.training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_loader, Generative_filepath, Disc_filepath)
