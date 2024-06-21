@@ -24,26 +24,10 @@ np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 
 
 if __name__ == "__main__":
+
+	#Link to Data
 	rgb_link = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\RGB_Final'
 	depth_link = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\Depth_Final'
-
-	#Setting up Transformations and Reverse Transformations
-	transform = transforms.Compose([
-		transforms.ToTensor(),
-		transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-	])
-
-	denormalize_rgb = transforms.Normalize(
-		mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
-		std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
-	)
-
-	denormalize_depth = transforms.Normalize(
-	mean=[-0.5 / 0.5],
-	std=[1 / 0.5]
-	)
-
-	to_pil = transforms.ToPILImage()
 
 	#Hyperparameters
 	lr = 3e-4
@@ -51,13 +35,31 @@ if __name__ == "__main__":
 	num_epochs = 50
 	z_dim = 64
 
+	#Transformers
+	transform = transforms.Compose([
+		transforms.ToTensor(),
+		transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+	])
+	to_pil = transforms.ToPILImage()
+	denormalize = transforms.Normalize(
+		mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
+		std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
+	)
+	denormalize_depth = transforms.Normalize(
+	mean=[-0.5 / 0.5],
+	std=[1 / 0.5]
+	)
+
 	#Setting up Model
 	disc = md.Discriminator()
 	gen = md.Generator(z_dim)
 
 	#Load Existing Model
-	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative.pth"
-	Disc_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Discriminator.pth"
+	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative_Dense.pth"
+	Disc_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Discriminator_Dense.pth"
+
+	torch.save(gen.state_dict(), Generative_filepath)
+	torch.save(disc.state_dict(), Disc_filepath)
 	gen.load_state_dict(torch.load(Generative_filepath))
 	disc.load_state_dict(torch.load(Disc_filepath))
 

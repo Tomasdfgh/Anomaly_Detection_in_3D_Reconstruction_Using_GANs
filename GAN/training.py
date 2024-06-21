@@ -13,13 +13,6 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 from PIL import Image
 
-to_pil = transforms.ToPILImage()
-
-denormalize = transforms.Normalize(
-    mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
-    std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
-)
-
 def show_sample_from_generator(gen, z_dim, batch_size):
 
 	to_pil = transforms.ToPILImage()
@@ -30,7 +23,7 @@ def show_sample_from_generator(gen, z_dim, batch_size):
 	)
 
 	def show_image():
-		noise = torch.rand(batch_size, z_dim).to(next(gen.parameters()).device)
+		noise = torch.randn(batch_size, z_dim).to(next(gen.parameters()).device)
 		with torch.no_grad():
 			fake_gen = gen(noise).cpu()
 		fake_gen = fake_gen.view(4, 108, 192)
@@ -57,7 +50,7 @@ def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, cr
 		for idx, real in enumerate(train_set):
 
 			#-------------Train Discriminator: max log(D(x)) + log(1 - D(G(z)))-------------#
-			noise = torch.rand(batch_size, z_dim)
+			noise = torch.randn(batch_size, z_dim)
 			fake_gen = gen(noise)
 			fake_gen = fake_gen.view(batch_size, 4, 108, 192)
 			
@@ -95,7 +88,7 @@ def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, cr
 				plt.plot(batch_num, D_loss, label = 'Discriminator Loss', color = 'red')
 				plt.plot(batch_num, G_loss, label = 'Generator Loss', color = 'blue')
 
-				plt.title("Generative and Discriminator Loss")
+				plt.title("Generator and Discriminator Loss")
 				plt.xlabel('Batch Number')
 				plt.ylabel('Loss')
 				plt.legend()
