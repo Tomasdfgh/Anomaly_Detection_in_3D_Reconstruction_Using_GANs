@@ -54,15 +54,13 @@ if __name__ == "__main__":
 	disc = md.Discriminator()
 	gen = md.Generator(z_dim)
 
-	#Load Existing Model
+	#Model Filepath
 	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative_Dense.pth"
 	Disc_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Discriminator_Dense.pth"
 
-	#torch.save(gen.state_dict(), Generative_filepath)
-	#torch.save(disc.state_dict(), Disc_filepath)
+	#Load Existing Model
 	gen.load_state_dict(torch.load(Generative_filepath))
 	disc.load_state_dict(torch.load(Disc_filepath))
-
 
 	#Setting up the Data
 	dataset = ld.load_data(rgb_link, depth_link, [])

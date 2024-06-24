@@ -13,7 +13,29 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 from PIL import Image
 
-def training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, opt_enc, train_set, criterion):
+def show_sample_from_generator(gen, z_dim, batch_size):
+
+	to_pil = transforms.ToPILImage()
+
+	denormalize = transforms.Normalize(
+		mean=[-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5],
+		std=[1 / 0.5, 1 / 0.5, 1 / 0.5]
+	)
+
+	def show_image():
+		noise = torch.randn(batch_size, z_dim).to(next(gen.parameters()).device)
+		with torch.no_grad():
+			fake_gen = gen(noise).cpu()
+		fake_gen = fake_gen[0].view(4, 108, 192)
+		rgb_tensor = fake_gen[:3, :, :]
+		data_new = to_pil(denormalize(rgb_tensor))
+		data_new.show()
+
+	thread = threading.Thread(target=show_image)
+	thread.start()
+
+
+def training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, opt_enc, train_set, criterion, Generative_filepath, Discriminator_filepath, Encoder_filepath):
 
 	d_loss_graph = []
 	g_loss_graph = []
@@ -21,6 +43,9 @@ def training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, o
 	batch_num = []
 
 	for epoch in range(num_epochs):
+
+		#-------------Show a sample of the Generative Model-------------#
+		show_sample_from_generator(gen, z_dim, 5)
 
 		disc.train()
 		gen.train()
@@ -85,6 +110,11 @@ def training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, o
 		disc.eval()
 		gen.eval()
 		enc.eval()
+
+		#Save Model
+		torch.save(gen.state_dict(), Generative_filepath)
+		torch.save(disc.state_dict(), Discriminator_filepath)
+		torch.save(enc.state_dict(), Encoder_filepath)
 
 	plt.ioff()
 	plt.show()

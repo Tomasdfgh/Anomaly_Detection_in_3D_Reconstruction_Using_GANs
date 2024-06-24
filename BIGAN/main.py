@@ -32,7 +32,7 @@ if __name__ == "__main__":
 	#Hyperparameters
 	lr = 3e-4
 	batch_size = 32
-	num_epochs = 2
+	num_epochs = 200
 	z_dim = 64
 
 	#Transformers
@@ -55,6 +55,16 @@ if __name__ == "__main__":
 	gen = md.Generator(z_dim)
 	enc = md.Encoder(z_dim)
 
+	#Model Filepath
+	Generative_filepath = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\BIGAN\BIGAN_Gen.pth'
+	Discriminator_filepath = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\BIGAN\BIGAN_Disc.pth'
+	Encoder_filepath = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\BIGAN\BIGAN_Enc.pth'
+
+	#Load Up Existing Model
+	gen.load_state_dict(torch.load(Generative_filepath))
+	disc.load_state_dict(torch.load(Discriminator_filepath))
+	enc.load_state_dict(torch.load(Encoder_filepath))
+
 	#Setting up the Data
 	dataset = ld.load_data(rgb_link, depth_link, [])
 	ImageSet = ld.ConvertData(dataset, transform = transform)
@@ -71,4 +81,4 @@ if __name__ == "__main__":
 	criterion = nn.BCELoss()
 
 	#Begin Training
-	tr.training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, opt_enc, train_loader, criterion)
+	tr.training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, opt_enc, train_loader, criterion, Generative_filepath, Discriminator_filepath, Encoder_filepath)
