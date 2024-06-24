@@ -205,17 +205,17 @@ if __name__ == "__main__":
 
     # List of commands to run
     commands = [
-        r'k4arecorder.exe --record-length 1 C:\Users\tomng\Desktop\3D_Detection_Using_GANs\output.mkv'
+        r'k4arecorder.exe --record-length 1 "C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\log.mkv"'
     ]
 
     run_cmd_commands(commands, working_dir)
 
     #----Decode Video into Images----#
 
-    working_dir = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\Obtain Data Scripts"
+    working_dir = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Obtain Data Scripts"
 
     commands = [
-        r'python azure_kinect_mkv_reader.py --input C:\Users\tomng\Desktop\3D_Detection_Using_GANs\output.mkv --output C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data'
+        r'python azure_kinect_mkv_reader.py --input "C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\log.mkv" --output "C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\pre_data"'
     ]
 
     run_cmd_commands(commands, working_dir)
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     #----Generate a Sample of 3D Models----#
 
     # Example usage:
-    folder_path = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data\color"
+    folder_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\pre_data\color"
     files = list_files_in_folder(folder_path)
 
     #Select Files at random
@@ -235,29 +235,29 @@ if __name__ == "__main__":
         selected_items_png[i] = selected_items_jpg[i][:-4] + '.png'
 
     #Move the .jpg files into the temporary folder
-    source_jpg = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data\color'
-    destination_jpg = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images'
+    source_jpg = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\pre_data\color'
+    destination_jpg = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Images'
     move_files_based_on_list(selected_items_jpg, source_jpg, destination_jpg)
 
     #Move the .png files into the temporary folder
-    source_png = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data\depth'
-    destination_png = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images'
+    source_png = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\pre_data\depth'
+    destination_png = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Images'
     move_files_based_on_list(selected_items_png, source_png, destination_png)
 
     #Count the number of files in the final dataset
-    count = count_files_in_directory(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\Depth_Images')
+    count = count_files_in_directory(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Depth_Images')
     print(count)
 
     #Renaming Files in Depth
-    folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images'
+    folder_path = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Images'
     rename_files_in_folder(folder_path, count)
 
     #Renaming Files in RGB
-    folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images'
+    folder_path = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Images'
     rename_files_in_folder(folder_path, count)
 
     #Delete Original Image Directory
-    folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data'
+    folder_path = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\pre_data'
     delete_folder(folder_path)
 
     #Obtaining list of images for displaying
@@ -268,15 +268,15 @@ if __name__ == "__main__":
         pc.pix_change(im)
 
     #Filter out data's background
-    gf.iterate_files_filter(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images',r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images', r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images')
+    gf.iterate_files_filter(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Images',r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Images', r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Images')
 
     #Render those 3d models as a point cloud in a subplot
     #v3.render_3d_models(jpg_ims, png_ims)
 
-    remove_png_files(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\Obtain Data Scripts')
+    remove_png_files(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Obtain Data Scripts')
 
     for i in range(len(png_ims)):
-        gf.finalize_im(png_ims[i], jpg_ims[i], r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Table_Removed', r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Table_Removed')
+        gf.finalize_im(png_ims[i], jpg_ims[i], r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Table_Removed', r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Table_Removed')
 
     # Set camera parameters
     lookat = np.array([0, 0, 0])

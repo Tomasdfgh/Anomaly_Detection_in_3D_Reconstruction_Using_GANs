@@ -224,8 +224,8 @@ def finalize_im(image_depth_path, image_rgb_path, rgb_save_path, depth_save_path
     #Zero out all background pixel values
 
     #Table's path. Used to remove the table in every data points
-    table_rgb_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\Table\RGB_Filtered\996.jpg'
-    table_depth_path = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\Table\Depth_Images\996.png"
+    table_rgb_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Table\RGB_Filtered\996.jpg"
+    table_depth_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Table\Depth_Images\996.png"
 
     #Grab the coordinates of images to look at, and then get the coordinates to zero out
     non_zero_coords = find_non_zero_coords_and_color_red(table_rgb_path)
