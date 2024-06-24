@@ -59,13 +59,16 @@ if __name__ == "__main__":
 	dataset = ld.load_data(rgb_link, depth_link, [])
 	ImageSet = ld.ConvertData(dataset, transform = transform)
 
-	# #Converting Data to Dataloader
+	#Converting Data to Dataloader
 	train_loader = torch.utils.data.DataLoader(ImageSet, batch_size = batch_size, shuffle = True)
 
 	#Optimizers and Criterion
-	opt_disc = optim.Adam(disc.parameters(), lr = lr)
-	opt_gen = optim.Adam(gen.parameters(), lr = lr)
+	opt_disc = optim.Adam(disc.parameters(), lr = lr, betas = (0.5, 0.999), weight_decay = 1e-5)
+	opt_enc = optim.Adam(enc.parameters(), lr = lr, betas = (0.5, 0.999), weight_decay = 1e-5)
+	opt_gen = optim.Adam(gen.parameters(), lr = lr, betas = (0.5, 0.999), weight_decay = 1e-5)
+
+	#Criterion
 	criterion = nn.BCELoss()
 
 	#Begin Training
-	#tr.training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_loader, Generative_filepath, Disc_filepath)
+	tr.training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, opt_enc, train_loader, criterion)

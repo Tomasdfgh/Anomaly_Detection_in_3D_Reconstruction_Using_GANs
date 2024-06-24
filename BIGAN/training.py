@@ -13,18 +13,60 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 from PIL import Image
 
+torch.autograd.set_detect_anomaly(True)
+
 def disc_loss(DG, DE, eps = 1e-6):
 	loss = torch.log(DE + eps) + torch.log(1 - DG + eps)
 	return - torch.mean(loss)
 
 
-def enc_gen_loss(DG, DE, eps = 1e-6):
-	loss = torch.log(DG + eps) + torch.log(1 - DE + eps)
+def gen_loss(DG, eps = 1e-6):
+	loss = torch.log(DG + eps)
+	return -torch.mean(loss)
+
+def enc_loss(DE, eps = 1e-6):
+	loss = torch.log(DE + eps)
 	return -torch.mean(loss)
 
 
-def training(gen, enc, disc, num_epochs):
+def training(gen, enc, disc, batch_size, num_epochs, z_dim, opt_disc, opt_gen, opt_enc, train_set, criterion):
 
 	for epoch in range(num_epochs):
+		
+		for idx, real in enumerate(train_set):
 
-		for i, 
+			images = real.reshape(real.size(0),-1)
+
+			#Getting Noise
+			z = torch.randn(batch_size, z_dim)
+
+			#Get G(z) and E(x)
+			Gz = gen(z)
+			Ex = enc(images)
+
+			#Get D(G(z), z) and D(x, E(x))
+			DG = disc(Gz, z)
+			DE = disc(images, Ex)
+
+			#Calculate Losses
+			loss_D = disc_loss(DG, DE)
+			loss_E = enc_loss(DE)
+			loss_G = gen_loss(DG)
+
+			#Encoder Training
+			opt_enc.zero_grad()
+			loss_E.backward(retain_graph = True)
+			opt_enc.step()
+
+			#Discriminator Training
+			opt_disc.zero_grad()
+			loss_D.backward(retain_graph = True)
+			opt_disc.step()
+
+			#Generator Training
+			opt_gen.zero_grad()
+			loss_G.backward()
+			opt_gen.step()
+
+			break
+		break

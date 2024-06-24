@@ -35,7 +35,7 @@ def show_sample_from_generator(gen, z_dim, batch_size):
 	thread.start()
 
 
-def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_set, Generative_filepath, Disc_filepath):
+def training(disc, gen, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criterion, train_set, Generative_filepath, Disc_filepath):
 
 	D_loss = []
 	G_loss = []
