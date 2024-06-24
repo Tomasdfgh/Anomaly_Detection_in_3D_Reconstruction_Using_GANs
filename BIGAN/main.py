@@ -32,7 +32,7 @@ if __name__ == "__main__":
 	#Hyperparameters
 	lr = 3e-4
 	batch_size = 32
-	num_epochs = 50
+	num_epochs = 2
 	z_dim = 64
 
 	#Transformers
