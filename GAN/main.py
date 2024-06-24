@@ -58,8 +58,8 @@ if __name__ == "__main__":
 	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative_Dense.pth"
 	Disc_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Discriminator_Dense.pth"
 
-	torch.save(gen.state_dict(), Generative_filepath)
-	torch.save(disc.state_dict(), Disc_filepath)
+	#torch.save(gen.state_dict(), Generative_filepath)
+	#torch.save(disc.state_dict(), Disc_filepath)
 	gen.load_state_dict(torch.load(Generative_filepath))
 	disc.load_state_dict(torch.load(Disc_filepath))
 

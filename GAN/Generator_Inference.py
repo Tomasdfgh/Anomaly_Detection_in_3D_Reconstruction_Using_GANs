@@ -62,4 +62,9 @@ if __name__ == "__main__":
 	gen.load_state_dict(torch.load(Generative_filepath))
 
 	rgb_im, depth_im = show_image(gen, z_dim, denormalize, denormalize_depth, to_pil)
-	v3.load_and_transform_model(rgb_im, depth_im)
+	#v3.load_and_transform_model(rgb_im, depth_im)
+
+	z_vector1 = torch.randn(1, z_dim).to(next(gen.parameters()).device)
+	z_vector2 = torch.randn(1, z_dim).to(next(gen.parameters()).device)
+
+	#print(torch.equal(gen(z_vector1), gen(z_vector1)))

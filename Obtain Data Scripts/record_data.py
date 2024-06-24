@@ -1,14 +1,16 @@
+#General Imports
 import subprocess
 import time
 import signal
 import os
 import random
 import shutil
-import view_3d as v3
-import pixel_change as pc
 import numpy as np
 import open3d as o3d
 
+#Local Imports
+import view_3d as v3
+import pixel_change as pc
 import general_functions as gf
 
 
@@ -254,9 +256,6 @@ if __name__ == "__main__":
     folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images'
     rename_files_in_folder(folder_path, count)
 
-    #Filter out data's background
-    gf.iterate_files_filter(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images',r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images', r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images')
-
     #Delete Original Image Directory
     folder_path = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\pre_data'
     delete_folder(folder_path)
@@ -268,10 +267,16 @@ if __name__ == "__main__":
     for im in png_ims:
         pc.pix_change(im)
 
+    #Filter out data's background
+    gf.iterate_files_filter(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images',r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images', r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images')
+
     #Render those 3d models as a point cloud in a subplot
-    v3.render_3d_models(jpg_ims, png_ims)
+    #v3.render_3d_models(jpg_ims, png_ims)
 
     remove_png_files(r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\Obtain Data Scripts')
+
+    for i in range(len(png_ims)):
+        gf.finalize_im(png_ims[i], jpg_ims[i], r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Table_Removed', r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Table_Removed')
 
     # Set camera parameters
     lookat = np.array([0, 0, 0])
