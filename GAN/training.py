@@ -43,6 +43,10 @@ def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, cr
 
 	for epoch in range(num_epochs):
 
+		disc.train()
+		gen.train()
+
+
 		#-------------Show a sample of the Generative Model-------------#
 		show_sample_from_generator(gen, z_dim, 1)
 
@@ -94,6 +98,9 @@ def training(disc, gen, lr, batch_size, num_epochs, z_dim, opt_disc, opt_gen, cr
 				plt.legend()
 				plt.pause(0.001)
 
+
+		disc.eval()
+		gen.eval()
 
 		#Save Model
 		torch.save(gen.state_dict(), Generative_filepath)
