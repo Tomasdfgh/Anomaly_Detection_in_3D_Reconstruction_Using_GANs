@@ -23,11 +23,11 @@ import view_3d as v3
 def show_image(gen, z_dim, denormalize, denormalize_depth, to_pil):
 
 	#Latent Vectors
-	z_vector = torch.randn(1, z_dim).to(next(gen.parameters()).device)
+	z_vector = torch.randn(5, z_dim).to(next(gen.parameters()).device)
 
 	#Generate Data
 	with torch.no_grad():
-		fake_gen = gen(z_vector).cpu().view(4, 108, 192)
+		fake_gen = gen(z_vector).cpu()[0].view(4, 108, 192)
 
 
 	rgb_tensor = fake_gen[:3, :, :]
@@ -57,9 +57,9 @@ if __name__ == "__main__":
 	z_dim = 64
 
 	#Load Model
-	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative_Dense.pth"
+	Generative_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\BIGAN\BIGAN_Gen.pth"
 	gen = md.Generator(z_dim)
 	gen.load_state_dict(torch.load(Generative_filepath))
 
 	rgb_im, depth_im = show_image(gen, z_dim, denormalize, denormalize_depth, to_pil)
-	v3.load_and_transform_model(rgb_im, depth_im)
+	#v3.load_and_transform_model(rgb_im, depth_im)
