@@ -55,8 +55,8 @@ if __name__ == "__main__":
 	gen = md.Generator(z_dim)
 
 	#Model Filepath
-	Generative_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\GAN_Generative_Dense2.pth"
-	Disc_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\GAN_Discriminator_Dense2.pth"
+	Generative_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\GAN_Generative_Dense.pth"
+	Disc_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\GAN_Discriminator_Dense.pth"
 
 	#torch.save(gen.state_dict(), Generative_filepath)
 	#torch.save(disc.state_dict(), Disc_filepath)

@@ -61,7 +61,7 @@ def training(disc, gen, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criter
 
 			disc_fake = disc(fake_gen).view(-1)
 			disc_loss_fake = criterion(disc_fake, torch.zeros_like(disc_fake))
-
+			
 			disc_loss = (disc_loss_real + disc_loss_fake) / 2
 
 			disc.zero_grad()
@@ -71,6 +71,7 @@ def training(disc, gen, batch_size, num_epochs, z_dim, opt_disc, opt_gen, criter
 			#---------Train Generator: min log(1 - D(G(z))) <-> max log(D(G(z))---------#
 			output = disc(fake_gen).view(-1)
 			gen_loss = criterion(output, torch.ones_like(output))
+
 			gen.zero_grad()
 			gen_loss.backward()
 			opt_gen.step()	
