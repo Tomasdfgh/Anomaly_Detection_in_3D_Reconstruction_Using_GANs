@@ -15,9 +15,9 @@ class Discriminator(nn.Module):
 		self.convLayer2 = nn.Conv2d(16,120,3)
 
 		#Fully Connected Layers
-		self.FulCon1 = nn.Linear(120 * 25 * 46, 256)
-		self.FulCon2 = nn.Linear(256, 120)
-		self.FulCon3 = nn.Linear(120,1)
+		self.FulCon1 = nn.Linear(120 * 25 * 46, 4096)
+		self.FulCon2 = nn.Linear(4096, 360)
+		self.FulCon3 = nn.Linear(360,1)
 	
 	def forward(self, x):
 
@@ -38,10 +38,10 @@ class Generator(nn.Module):
 	def __init__(self, z_dim):
 		super().__init__()
 
-		self.FulCon1 = nn.Linear(z_dim, 256)
-		self.FulCon2 = nn.Linear(256, 512)
-		self.FulCon3 = nn.Linear(512, 120)
-		self.FulCon4 = nn.Linear(120, 4 * 108 * 192)
+		self.FulCon1 = nn.Linear(z_dim, 4096)
+		self.FulCon2 = nn.Linear(4096, 4096)
+		self.FulCon3 = nn.Linear(4096, 1024)
+		self.FulCon4 = nn.Linear(1024, 4 * 108 * 192)
 
 		self.tanh = nn.Tanh()
 

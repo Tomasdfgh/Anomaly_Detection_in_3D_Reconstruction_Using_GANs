@@ -26,9 +26,9 @@ np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 if __name__ == "__main__":
 
 	#Link to Data
-	rgb_link = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\RGB_Final'
-	depth_link = r'C:\Users\tomng\Desktop\3D_Detection_Using_GANs\rectangle_data\Depth_Final'
-
+	rgb_link = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\RGB_Final'
+	depth_link = r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Depth_Final'
+	
 	#Hyperparameters
 	lr = 3e-4
 	batch_size = 32
@@ -55,8 +55,11 @@ if __name__ == "__main__":
 	gen = md.Generator(z_dim)
 
 	#Model Filepath
-	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative_Dense.pth"
-	Disc_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Discriminator_Dense.pth"
+	Generative_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\GAN_Generative_Dense2.pth"
+	Disc_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\GAN_Discriminator_Dense2.pth"
+
+	#torch.save(gen.state_dict(), Generative_filepath)
+	#torch.save(disc.state_dict(), Disc_filepath)
 
 	#Load Existing Model
 	gen.load_state_dict(torch.load(Generative_filepath))
