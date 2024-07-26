@@ -15,9 +15,10 @@ from PIL import Image
 
 #Local Files
 import loadData as ld
-import model as md
+import model1 as md
 import training as tr
 import view_3d as v3
+import DC_model as dcm
 
 
 def show_image(gen, z_dim, denormalize, denormalize_depth, to_pil):
@@ -40,6 +41,21 @@ def show_image(gen, z_dim, denormalize, denormalize_depth, to_pil):
 
 	return rgb_im, depth_im
 
+def show_image_depth(gen, z_dim, denormalize, denormalize_depth, to_pil):
+
+	#Latent Vectors
+	z_vector = torch.randn(1, z_dim).to(next(gen.parameters()).device)
+
+	#Generate Data
+	with torch.no_grad():
+		fake_gen = gen(z_vector).cpu().view(1, 108, 192)
+
+	depth_im = to_pil(denormalize_depth(fake_gen))
+	depth_im.show()
+
+	return depth_im
+
+
 if __name__ == "__main__":
 
 	#Transformers
@@ -57,9 +73,23 @@ if __name__ == "__main__":
 	z_dim = 64
 
 	#Load Model
-	Generative_filepath = r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\GAN\GAN_Generative_Dense.pth"
+	Generative_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Rectangle_WGAN2_Traced"
 	gen = md.Generator(z_dim)
-	gen.load_state_dict(torch.load(Generative_filepath))
+	gen.load_state_dict(torch.load(Generative_filepath, map_location=torch.device('cpu')))
 
-	rgb_im, depth_im = show_image(gen, z_dim, denormalize, denormalize_depth, to_pil)
-	v3.load_and_transform_model(rgb_im, depth_im)
+	#rgb_im, depth_im = show_image(gen, z_dim, denormalize, denormalize_depth, to_pil)
+
+	depth_im = show_image_depth(gen, z_dim, denormalize, denormalize_depth, to_pil)
+
+	# Generate image
+	red_image = np.zeros((108, 192, 3), dtype=np.uint8)
+	red_image[:, :, 0] = 255  # Set the red channel to 255
+
+	v3.load_and_transform_model(red_image, depth_im)
+
+	show_many = False
+	if show_many:
+		for i in range(4):
+			print(i)
+			rgb_im, depth_im = show_image(gen, z_dim, denormalize, denormalize_depth, to_pil)
+	#v3.load_and_transform_model(rgb_im, depth_im)

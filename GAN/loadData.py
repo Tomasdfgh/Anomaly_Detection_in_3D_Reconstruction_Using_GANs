@@ -31,6 +31,26 @@ class ConvertData(Dataset):
 
 		return combined_image
 
+class ConvertData_Depth(Dataset):
+	def __init__(self, dataset, transform = None):
+		self.dataset = dataset
+		self.transform = transform
+
+	def __len__(self):
+		return len(self.dataset)
+
+	def __getitem__(self, idx):
+		depth_image, rgb_image = self.dataset[idx]
+
+		rgb_image = self.transform(rgb_image)
+
+		depth_image = transforms.ToTensor()(depth_image)
+		depth_image = transforms.Normalize((0.5,),(0.5,))(depth_image)
+
+		combined_image = torch.cat((rgb_image, depth_image), dim = 0)
+
+		return depth_image
+
 
 def load_data(rgb_link, depth_link, dataset):
 
