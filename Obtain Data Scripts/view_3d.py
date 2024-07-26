@@ -65,8 +65,10 @@ if __name__ == "__main__":
     front = np.array([0, 0, -1])
     zoom = 0.5
 
+    print("This file")
+
     # Show the first model with specified camera parameters
-    pcd = load_and_transform_model(r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\RGB_Images\5.jpg", r"C:\Users\tomng\Desktop\3D_Detection_Using_GANs\decide_data\Depth_Images\5.png")
+    pcd = load_and_transform_model(r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\RGB_Reduced\401.jpg", r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\Depth_Reduced\401.png")
     o3d.visualization.draw_geometries(
         [pcd], 
         lookat=lookat, 

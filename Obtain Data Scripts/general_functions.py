@@ -198,7 +198,8 @@ def pix_change(image, pix_value):
     return Image.fromarray(image)
 
 
-def normalize_to_8bit(image, size=(192, 108)):
+
+def normalize_to_8bit(image, size=(64, 64)):
     try:
 
         if image is None:
@@ -224,8 +225,8 @@ def finalize_im(image_depth_path, image_rgb_path, rgb_save_path, depth_save_path
     #Zero out all background pixel values
 
     #Table's path. Used to remove the table in every data points
-    table_rgb_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Table\RGB_Filtered\996.jpg"
-    table_depth_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Table\Depth_Images\996.png"
+    table_rgb_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Table\RGB_Filtered\1501.jpg"
+    table_depth_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Table\Depth_Images\1501.png"
 
     #Grab the coordinates of images to look at, and then get the coordinates to zero out
     non_zero_coords = find_non_zero_coords_and_color_red(table_rgb_path)
@@ -236,11 +237,27 @@ def finalize_im(image_depth_path, image_rgb_path, rgb_save_path, depth_save_path
     final_depth = zero_out_depth_values(diff_coords, image_depth_path)
 
     #Resize and normalize image
-    rgb_im = normalize_to_8bit(final_rgb)
-    depth_im = normalize_to_8bit(final_depth)
+    #rgb_im = normalize_to_8bit(final_rgb)
+    #depth_im = normalize_to_8bit(final_depth)
 
     #Remove noise by removing all pixel values before actual object
-    depth_im = pix_change(depth_im, 110)
+    #depth_im = pix_change(depth_im, 100)
+
+    #Save Images
+    rgb_name = os.path.basename(image_rgb_path)
+    depth_name = os.path.basename(image_depth_path)
+
+    final_rgb.save(rgb_save_path + r"//" + rgb_name)
+    final_depth.save(depth_save_path + r"//" + depth_name)
+    
+def reduce_im(image_depth_path, image_rgb_path, rgb_save_path, depth_save_path):
+
+    rgb_im = np.array(Image.open(image_rgb_path))
+    depth_im = np.array(Image.open(image_depth_path))
+
+    #Resize and normalize image
+    rgb_im = normalize_to_8bit(rgb_im)
+    depth_im = normalize_to_8bit(depth_im)
 
     #Save Images
     rgb_name = os.path.basename(image_rgb_path)
@@ -248,3 +265,68 @@ def finalize_im(image_depth_path, image_rgb_path, rgb_save_path, depth_save_path
 
     rgb_im.save(rgb_save_path + r"//" + rgb_name)
     depth_im.save(depth_save_path + r"//" + depth_name)
+
+def cut_im(image_depth_path, image_rgb_path, rgb_save_path, depth_save_path):
+    def should_cut_column(image, column_index):
+        column = image[:, column_index]
+        zero_elems = np.count_nonzero(column == 0)
+        return (zero_elems / column.size) >= 0.65
+
+    rgb_im = np.array(Image.open(image_rgb_path))
+    depth_im = np.array(Image.open(image_depth_path))
+    h, w, _ = rgb_im.shape
+
+    left = True  # Start cutting from the left
+
+    while h != w:
+        cut_made = False
+
+        if left:
+            # Check and cut from the left
+            if should_cut_column(rgb_im, 0):
+                rgb_im = rgb_im[:, 1:]
+                depth_im = depth_im[:, 1:]
+                w -= 1
+                cut_made = True
+        else:
+            # Check and cut from the right
+            if should_cut_column(rgb_im, -1):
+                rgb_im = rgb_im[:, :-1]
+                depth_im = depth_im[:, :-1]
+                w -= 1
+                cut_made = True
+
+        # Alternate the side to cut from
+        left = not left
+
+        # If no columns were cut in this iteration, break the loop to avoid infinite loop
+        if not cut_made:
+            break
+
+    rgb_im = Image.fromarray(rgb_im)
+    depth_im = Image.fromarray(depth_im)
+    #rgb_im.show()
+
+    # Save Images
+    rgb_name = os.path.basename(image_rgb_path)
+    depth_name = os.path.basename(image_depth_path)
+
+    rgb_im.save(os.path.join(rgb_save_path, rgb_name))
+    depth_im.save(os.path.join(depth_save_path, depth_name))
+
+
+
+if __name__ == "__main__":
+    
+    rgb_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\RGB_Filtered"
+    depth_path = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Depth_Images"
+    for root, dirs, files in os.walk(depth_path):
+        for file in files:
+
+
+            jpg_file = file[:-4] + '.jpg'
+
+            depth_image_path = os.path.join(root, file)
+            rgb_image_path = os.path.join(rgb_path, jpg_file)
+
+            finalize_im(depth_image_path, rgb_image_path, r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\RGB_Big_Table_Removed" , r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Depth_Big_Table_Removed")

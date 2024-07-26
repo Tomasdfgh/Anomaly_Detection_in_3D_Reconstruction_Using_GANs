@@ -18,9 +18,5 @@ def pix_change(image_path):
         # Apply the mask to the image
         image[mask] = 0
 
-        # Display modified image shape and type
-        print(f"Modified image shape: {image.shape}")
-        print(f"Modified image type: {image.dtype}")
-
         # Save the modified image
         cv2.imwrite(image_path, image)

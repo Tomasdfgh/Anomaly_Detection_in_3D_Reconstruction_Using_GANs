@@ -7,11 +7,35 @@ import random
 import shutil
 import numpy as np
 import open3d as o3d
+import time
 
 #Local Imports
 import view_3d as v3
 import pixel_change as pc
 import general_functions as gf
+
+def move_files(src_dir, dest_dir):
+    """
+    Moves all files from the source directory to the destination directory.
+    
+    Parameters:
+        src_dir (str): Path to the source directory.
+        dest_dir (str): Path to the destination directory.
+    """
+    # Ensure the destination directory exists
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+    
+    # Iterate over all the files in the source directory
+    for filename in os.listdir(src_dir):
+        src_file = os.path.join(src_dir, filename)
+        
+        # Check if the path is a file
+        if os.path.isfile(src_file):
+            dest_file = os.path.join(dest_dir, filename)
+            shutil.move(src_file, dest_file)
+            print(f"Moved: {src_file} to {dest_file}")
+
 
 
 def run_cmd_commands(commands, working_dir=None):
@@ -245,7 +269,7 @@ if __name__ == "__main__":
     move_files_based_on_list(selected_items_png, source_png, destination_png)
 
     #Count the number of files in the final dataset
-    count = count_files_in_directory(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\rectangle_data\Depth_Images')
+    count = count_files_in_directory(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\RGB')
     print(count)
 
     #Renaming Files in Depth
@@ -278,18 +302,34 @@ if __name__ == "__main__":
     for i in range(len(png_ims)):
         gf.finalize_im(png_ims[i], jpg_ims[i], r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Table_Removed', r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Table_Removed')
 
-    # Set camera parameters
-    lookat = np.array([0, 0, 0])
-    up = np.array([0, -1, 0])
-    front = np.array([0, 0, -1])
-    zoom = 0.5
+    png_ims = list_filepath_in_folder(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Table_Removed')
+    jpg_ims = list_filepath_in_folder(r'C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Table_Removed')
 
-    # Show the first model with specified camera parameters
-    pcd = v3.load_and_transform_model(jpg_ims[0], png_ims[0])
-    o3d.visualization.draw_geometries(
-        [pcd], 
-        lookat=lookat, 
-        up=up, 
-        front=front, 
-        zoom=zoom
-    )
+    time.sleep(1)
+
+    move_files(r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Images", r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\RGB")
+    move_files(r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\RGB_Table_Removed", r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\RGB_Reduced")
+    move_files(r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Images", r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\Depth")
+    move_files(r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\decide_data\Depth_Table_Removed", r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Spherical Data\Depth_Reduced")
+
+
+
+    #png_ims = list_filepath_in_folder(destination_png)
+    #jpg_ims = list_filepath_in_folder(destination_jpg)
+
+
+    # # Set camera parameters
+    # lookat = np.array([0, 0, 0])
+    # up = np.array([0, -1, 0])
+    # front = np.array([0, 0, -1])
+    # zoom = 0.5
+
+    # # Show the first model with specified camera parameters
+    # pcd = v3.load_and_transform_model(jpg_ims[0], png_ims[0])
+    # o3d.visualization.draw_geometries(
+    #     [pcd], 
+    #     lookat=lookat, 
+    #     up=up, 
+    #     front=front, 
+    #     zoom=zoom
+    # )
