@@ -15,7 +15,6 @@ from PIL import Image
 
 #Local Files
 import loadData as ld
-import model1 as md
 import training as tr
 import view_3d as v3
 import DC_model as dcm
@@ -74,7 +73,7 @@ if __name__ == "__main__":
 
 	#Load Model
 	Generative_filepath = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Rectangle_WGAN2_Traced"
-	gen = md.Generator(z_dim)
+	gen = dcm.Generator(z_dim)
 	gen.load_state_dict(torch.load(Generative_filepath, map_location=torch.device('cpu')))
 
 	#rgb_im, depth_im = show_image(gen, z_dim, denormalize, denormalize_depth, to_pil)

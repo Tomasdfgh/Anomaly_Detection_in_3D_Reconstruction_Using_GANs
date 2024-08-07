@@ -12,45 +12,42 @@ from torch.utils.data import Dataset
 
 
 class ConvertData(Dataset):
-	def __init__(self, dataset, transform = None):
+	def __init__(self, dataset, transform_rgb = None, im_size = None):
 		self.dataset = dataset
-		self.transform = transform
+		self.transform_rgb = transform_rgb
+		self.im_size = im_size
 
 	def __len__(self):
 		return len(self.dataset)
 
 	def __getitem__(self, idx):
 		depth_image, rgb_image = self.dataset[idx]
+		
+		rgb_image = self.transform_rgb(rgb_image)
 
-		rgb_image = self.transform(rgb_image)
-
-		depth_image = transforms.ToTensor()(depth_image)
-		depth_image = transforms.Normalize((0.5,),(0.5,))(depth_image)
+		#depth_image = transforms.Resize((self.im_size, self.im_size), interpolation = InterpolationMode.BILINEAR)(depth_image)
+		depth_image = transforms.ToTensor()(depth_image).float()
+		depth_image = transforms.Normalize(mean = [0.5], std = [0.5])(depth_image)
 
 		combined_image = torch.cat((rgb_image, depth_image), dim = 0)
 
 		return combined_image
 
+
 class ConvertData_Depth(Dataset):
-	def __init__(self, dataset, transform = None):
-		self.dataset = dataset
-		self.transform = transform
+		def __init__(self, dataset, transform = None):
+				self.dataset = dataset
+				self.transform = transform
 
-	def __len__(self):
-		return len(self.dataset)
+		def __len__(self):
+				return len(self.dataset)
 
-	def __getitem__(self, idx):
-		depth_image, rgb_image = self.dataset[idx]
+		def __getitem__(self, idx):
+				depth_image = self.dataset[idx]
+				if self.transform:
+					depth_image = self.transform(depth_image)
 
-		rgb_image = self.transform(rgb_image)
-
-		depth_image = transforms.ToTensor()(depth_image)
-		depth_image = transforms.Normalize((0.5,),(0.5,))(depth_image)
-
-		combined_image = torch.cat((rgb_image, depth_image), dim = 0)
-
-		return depth_image
-
+				return depth_image
 
 def load_data(rgb_link, depth_link, dataset):
 
@@ -66,5 +63,20 @@ def load_data(rgb_link, depth_link, dataset):
 		dataset.append((depth_image, rgb_image))
 
 	return dataset
+
+def load_data_depth(rgb_link, depth_link, dataset):
+
+
+		for filename in os.listdir(rgb_link):
+
+				rgb_path = os.path.join(rgb_link, filename)
+				depth_path = os.path.join(depth_link, filename[:-4] + '.png')
+
+				depth_image = Image.open(depth_path)
+				rgb_image = Image.open(rgb_path)
+
+				dataset.append(depth_image)
+
+		return dataset
 
 
