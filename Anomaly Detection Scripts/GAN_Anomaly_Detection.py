@@ -12,14 +12,10 @@ import os
 from torchvision.datasets import ImageFolder
 from torch.utils.data import Dataset
 from PIL import Image
-import open3d as o3d
 import random
 import copy
 
 #Local Files
-import GAN_model as gm
-import view_3d as v3
-import Generator_Inference as gi
 import loadData as ld
 
 to_pil = transforms.ToPILImage()
@@ -32,7 +28,7 @@ mean=[-0.5 / 0.5],
 std=[1 / 0.5]
 )
 
-def latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen, batch_size):
+def latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen):
 
 	#Get the initial model weights
 	init_weight = copy.deepcopy(gen.state_dict())
@@ -47,9 +43,6 @@ def latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen, batch_size):
 
 	for j in range(n_seed):
 
-		# im_list = []
-		# im_list.append(to_pil(denormalize(data[:3])))
-
 		#Load up the model
 		gen.load_state_dict(init_weight)
 
@@ -60,12 +53,8 @@ def latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen, batch_size):
 		for t in range(k):
 
 			#Obtaining G(z)
-			#gen_z = gen(z_list[j])[torch.randint(0, batch_size, (1,)).item()]
 			gen_z = gen(z_list[j])[0]
 			loss = F.mse_loss(gen_z.view(4,64,64), data)
-
-			# rgb = to_pil(denormalize(gen_z[:3]))
-			# im_list.append(rgb)
 
 			#zeroing out gradients for both z and gen
 			opt_gen.zero_grad()
@@ -80,23 +69,12 @@ def latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen, batch_size):
 
 		mod_weights[j] = copy.deepcopy(gen.state_dict())
 
-		# fig, axes = plt.subplots(5, 4, figsize=(14, 9))
-
-		# for i, ax in enumerate(axes.flatten()):
-		# 	ax.imshow(im_list[i], cmap='gray')
-		# 	ax.axis('off')  # Hide the axis
-
-		# plt.tight_layout()
-		# plt.show()
-
 	#Calculate the Final Loss value from all the different seeds
 	total_loss = 0
 	for j in range(n_seed):
 
 		#Create model with final weights
 		gen.load_state_dict(mod_weights[j])
-
-		#gen_z = gen(z_list[j])[torch.randint(0, batch_size, (1,)).item()]
 		gen_z = gen(z_list[j])[0]
 		loss = F.mse_loss(gen_z.view(4, 64,64), data)
 
@@ -104,7 +82,7 @@ def latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen, batch_size):
 
 	return (1/n_seed) * total_loss
 
-def get_loss_result(gen, lr_z, lr_G, n_seed, k, z_dim, total_data, batch_size):
+def get_loss_result(gen, lr_z, lr_G, n_seed, k, z_dim, total_data):
 
 	correct = 0
 	correct_pos = 0
@@ -116,7 +94,7 @@ def get_loss_result(gen, lr_z, lr_G, n_seed, k, z_dim, total_data, batch_size):
 
 
 		data, label = i
-		loss = latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen, batch_size)
+		loss = latent_search(lr_z, lr_G, n_seed, k, z_dim, data, gen)
 		loss_avg[label] += loss
 		avg_count[label] += 1
 
@@ -125,18 +103,31 @@ def get_loss_result(gen, lr_z, lr_G, n_seed, k, z_dim, total_data, batch_size):
 		print("Rec Avg: " + str(loss_avg[1]/avg_count[1]) + ", Cyl Avg: " + str(loss_avg[2]/avg_count[2]) + ", Sph Avg: " + str(loss_avg[3]/avg_count[3]))
 		print('\n')
 
-		result.append((loss, label))
+		result.append((loss, label, data))
 
 	return result
 
 def return_acc(threshold, shape_code, result):
 
+	#Find true positives and false positives
+
 	correct = 0
 	correct_pos = 0
 	correct_neg = 0
 
+	right_label = 0
+	wrong_label = 0
+
+	fp_ = 0
+	fp_count = 0
+
 	for i in result:
 		loss, label = i[0],i[1]
+
+		if label == shape_code:
+			right_label += 1
+		else:
+			wrong_label += 1
 
 		if loss <= threshold and label == shape_code:
 			correct += 1
@@ -145,8 +136,18 @@ def return_acc(threshold, shape_code, result):
 		elif loss > threshold and label != shape_code:
 			correct += 1
 			correct_neg += 1
+			fp_count += 1
 
-	return correct/150, correct_pos/50, correct_neg/100
+		if loss <= threshold and label != shape_code:
+			fp_ += 1
+			fp_count += 1
+
+	overall_acc = correct / len(result) if len(result) > 0 else 0
+	true_pos = correct_pos / right_label if right_label > 0 else 0
+	true_neg = correct_neg / wrong_label if wrong_label > 0 else 0
+	false_pos = fp_ / fp_count if fp_count > 0 else 0
+
+	return overall_acc, true_pos, true_neg, false_pos
 
 def graphing(group_code, gan_code, use_result):
 
@@ -175,7 +176,7 @@ def graphing(group_code, gan_code, use_result):
 	
 	for i in np.arange(0.00, 0.5, 0.0001):
 
-		acc, tp_, tn_ = return_acc(i, group_code, use_result)
+		acc, tp_, tn_, _ = return_acc(i, group_code, use_result)
 		min_tp_tn = abs(tp_ - tn_)
 
 		x_count.append(i)
@@ -203,7 +204,7 @@ def graphing(group_code, gan_code, use_result):
 	#Plot the Graph
 	plt.title('Performance Metrics vs. Threshold for ' + str(name_dict[group_code]) + " " + str(gan_type[gan_code]))
 	plt.xlabel('Threshold')
-	plt.ylabel('Percentage (%)')
+	plt.ylabel('Accuracy (%)')
 	plt.scatter([best_min_th], [(100 * best_min_acc)], color = 'red', marker = 'o', s = 35, label = 'Optimal Accuracy', zorder = 2)
 	plt.scatter([max_th], [(100 * max_acc)], color = 'brown', marker = 'o', s = 35, label = 'Max Accuracy', zorder = 2)
 	plt.plot(x_count, acc_plot, label = 'Accuracy', zorder = 1)
@@ -223,18 +224,25 @@ def graphing(group_code, gan_code, use_result):
 	cyl_avg = 0
 	sph_avg = 0
 
+	rec_avg_count = 0
+	cyl_avg_count = 0
+	sph_avg_count = 0
+
 	for i in use_result:
 		if i[1] == 1:
 			rec_avg += i[0]
+			rec_avg_count += 1
 		if i[1] == 2:
 			cyl_avg += i[0]
+			cyl_avg_count += 1
 		if i[1] == 3:
 			sph_avg += i[0]
+			sph_avg_count += 1
 
 	# Calculate average values
-	rec_avg /= 50
-	cyl_avg /= 50
-	sph_avg /= 50
+	rec_avg /= rec_avg_count
+	cyl_avg /= cyl_avg_count
+	sph_avg /= sph_avg_count
 
 	rec_color = {1: 'red', 2: 'blue', 3: 'blue'}
 	cyl_color = {1: 'blue', 2: 'red', 3: 'blue'}
@@ -254,47 +262,75 @@ def graphing(group_code, gan_code, use_result):
 	plt.show()
 
 
+def concatenate_images(image_list, cols, rows):
+	# Ensure the number of images matches the specified grid
+	assert len(image_list) == rows * cols, "Number of images must match rows * cols"
+	
+	images = [to_pil(denormalize(i[:3, :, :])) for i in image_list]
+	
+	# Calculate the width and height for each cell
+	max_width = max(image.width for image in images)
+	max_height = max(image.height for image in images)
+	
+	# Create a new blank image with the calculated width and height
+	concatenated_image = Image.new('RGB', (cols * max_width, rows * max_height))
+	
+	# Paste each image into the new image
+	for row in range(rows):
+		for col in range(cols):
+			idx = row * cols + col
+			image = images[idx]
+			x_offset = col * max_width
+			y_offset = row * max_height
+			concatenated_image.paste(image, (x_offset, y_offset))
+	
+	return concatenated_image
+
+
+
 if __name__ == "__main__":
 
 	#Links to the Model and Dataset
-	rgb_link = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\rectangle_data\RGB_Final_FR_Now"
-	depth_link = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\rectangle_data\Depth_Final_FR_Now"
+	rgb_link = r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\rectangle_data\RGB_Final_FR_Now"
+	depth_link = r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\rectangle_data\Depth_Final_FR_Now"
 
-	rgb_link_cyl = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\cylinder_data\RGB_Final"
-	depth_link_cyl = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\cylinder_data\Depth_Final"
+	rgb_link_cyl = r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\cylinder_data\RGB_Final"
+	depth_link_cyl = r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\cylinder_data\Depth_Final"
 
-	rgb_link_sphere = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\spherical Data\Spherical_RGB_Final"
-	depth_link_sphere = r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\spherical Data\Spherical_Depth_Final"
+	rgb_link_sphere = r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\spherical Data\Spherical_RGB_Final"
+	depth_link_sphere = r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\Data\spherical Data\Spherical_Depth_Final"
 
 	model_link = {
 	1: {
 	#Rectangle GAN:	
-	1: r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Rectangular\Rectangle_GAN_Traced",
+	1: r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Rectangular\Rectangle_GAN_Traced",
 	
 	#Rectangle WGAN:
-	2: r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Rectangular\Rectangle_WGAN_traced"
+	2: r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Rectangular\Rectangle_WGAN_traced"
 	},
 	
 	2: {
 	#Cylinder GAN:
-	1: r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Cylindrical\Cylinder_GAN_Traced",
+	1: r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Cylindrical\Cylinder_GAN_Traced",
 
 	#Cylinder WGAN:
-	2: r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Cylindrical\Cylinder_WGAN_Traced"
+	2: r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Cylindrical\Cylinder_WGAN_Traced"
 	},
 
 	3: {
 	#Spherical GAN:
-	1: r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Spherical\Spherical_GAN_Traced",
+	1: r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Spherical\Spherical_GAN_Traced",
 	
 	#Spherical WGAN:
-	2: r"C:\Users\tomng\Desktop\Git Uploads\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Spherical\Spherical_WGAN_Traced"
+	2: r"C:\Users\sens\Desktop\Tom's\Anomaly_Detection_in_3D_Reconstruction_Using_GANs\GAN\Models\Spherical\Spherical_WGAN_Traced"
 	}
 	}
 
 	#Testing Codes. Used to determine the model type used and which shape to determine the accuracy
-	group_code = 2 		#Legend: 1 for rec, 2 for cyl, and 3 for sph
-	gan_code = 1 		#Legend: 1 for gan and 2 for wgan
+	group_code = 3 		#Legend: 1 for rec, 2 for cyl, and 3 for sph
+	gan_code = 2 		#Legend: 1 for gan and 2 for wgan
+
+	#'''
 	
 	#Hyperparameters
 	lr_z = 5e-2
@@ -302,7 +338,6 @@ if __name__ == "__main__":
 	n_seed = 1
 	k = 19
 	z_dim = 100
-	batch_size = 1
 	channels_img = 4
 
 	#Transformer
@@ -314,17 +349,17 @@ if __name__ == "__main__":
 	#Setting up rectangular Data
 	dataset = ld.load_data(rgb_link, depth_link, [])
 	ImageSet = list(ld.ConvertData(dataset, transform = transform_RGB))
-	rectangle_use = random.sample(ImageSet, 50)
+	rectangle_use = random.sample(ImageSet, 25)
 
 	#Setting up Cylindrical Data
 	dataset_cyl = ld.load_data(rgb_link_cyl, depth_link_cyl, [])
 	ImageSet_cyl = list(ld.ConvertData(dataset_cyl, transform = transform_RGB))
-	cylindrical_use = random.sample(ImageSet_cyl, 50)
+	cylindrical_use = random.sample(ImageSet_cyl, 25)
 
 	#Setting up Spherical Data
 	dataset_sph = ld.load_data(rgb_link_sphere, depth_link_sphere, [])
 	ImageSet_sph = list(ld.ConvertData(dataset_sph, transform = transform_RGB))
-	spherical_use = random.sample(ImageSet_sph, 50)
+	spherical_use = random.sample(ImageSet_sph, 25)
 
 	#Setting up total Dataset
 	total_data = []
@@ -339,5 +374,28 @@ if __name__ == "__main__":
 	#Load up the model
 	gen = torch.jit.load(model_link[group_code][gan_code])
 
-	#Get Loss Result
-	graphing(group_code, gan_code, get_loss_result(gen, lr_z, lr_G, n_seed, k, z_dim, total_data, batch_size))
+	#Assign Anomaly score to the sampled data
+	result = get_loss_result(gen, lr_z, lr_G, n_seed, k, z_dim, total_data)
+	#'''
+
+	#The First set of Experiments:
+	first = True
+	if first:
+		#Get Loss Result
+		graphing(3, 1, result)
+
+	second = False
+	if second:
+		row = 6
+		col = 2
+
+		result = sorted(result, key=lambda x: x[0])
+
+		top_im = concatenate_images([i[2] for i in result[:row * col]], row, col)
+		top_im.show()
+
+		bottom_im = concatenate_images([i[2] for i in result[-(row * col):]], row, col)
+		bottom_im.show()
+
+
+
