@@ -1,6 +1,6 @@
 # GAN
 
-This directory contains the scripts for the architecutre of the DCGAN model, GAN training, and WGAN training. This read me file will breakdown the theory behind GANs and WGANs.
+This directory contains the scripts for the architecutre of the DCGAN model, GAN training, and WGAN training. The torch trace of every generators trained for this project can be found in the Model directory. This read me file will breakdown the theory behind GANs and WGANs.
 
 ## Generative Adversarial Networks (GANs)
 
