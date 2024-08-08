@@ -335,7 +335,7 @@ if __name__ == "__main__":
 	#Hyperparameters
 	lr_z = 5e-2
 	lr_G = 6e-9
-	n_seed = 1
+	n_seed = 3
 	k = 19
 	z_dim = 100
 	channels_img = 4
