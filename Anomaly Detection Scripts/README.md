@@ -18,6 +18,31 @@ $loss = \frac{1}{n_{seed}}\{ \sum_{n} l(G_{\theta_{n,k}}(z_{n,k}), x)}$
 
 Where $z_k$ and $G_{\theta_k}$ is the latent vector and generator after $k^{th}$ iteration of reconstruction loss propagation. If the final loss value is low for that data sample, then the data is deemed as less anomalous, and vice versa.
 
+### Anomaly Detection Algorithm using GANs for 4 Channels (RGBD) Data Frame
+
+**Input:**
+- Learning rate for latent vector and generator ($γ_z$, $γ_θ$)
+- Number of seeds ($n_{seed}$)
+- Data sample ($x$)
+- Latent space distribution ($p_z$)
+- Generator ($G_θ$)
+- Reconstruction loss ($l$)
+
+**Output:**
+- Anomaly Score
+
+**Algorithm:**
+
+1. Initialize { $\{ z_{j,0} \mid z_{j,0} \sim p_z, \, j = 1, \ldots, n_{seed} \}$ } and { ${ G_{θ_{j, 0}} | G_{θ_{j, 0}} ≡ G_{θ}, j = 1, ..., n_{seed} }$ }
+
+2. For each $j$ from $1$ to $n_{seed}$:
+    1. For each $t$ from $1$ to $k$:
+        - Update latent vector: $z_{j,t} ← z_{j,t-1} - γ_z * ∇_{z_{j,t-1}} l(G_{θ_{j, t-1}}(z_{j,t-1}), x)$
+        - Update generator parameters: $θ_{j,t} ← θ_{j,t-1} - γ_θ * ∇_{θ_{j,t-1}} l(G_{θ_{j, t-1}}(z_{j,t-1}), x)$
+
+3. Return: $(1/n_{seed}) * Σ_{j=1}^{n_{seed}} l(G_{θ_{j,k}}(z_{j,k}), x)$
+
+
 ### Learning Rate for Latent Space ($\gamma_z$) and Generator ($\gamma_{\theta}$)
 
 While searching through the latent space to detect anomalous data is a common technique using GANs, it is uncommon to also change the generator's weights to enhance its representational capabilities. While both improve accuracy in assigning an anomaly score to the data sample, there is a difference between propagating through the latent space and adjusting the generator's weights. The learning rates for each have different implications that can affect various applications of anomaly detection.
