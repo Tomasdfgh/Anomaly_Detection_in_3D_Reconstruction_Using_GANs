@@ -12,7 +12,7 @@ Anomaly detection is a critical task in machine learning, where the goal is to i
 - **Anomaly Detection Scripts:** This folder contains the script of the algorithm used to get the generator to assign an anomaly score to data samples, and the read me file has a detailed explaination of the algorithm, and the results.
 - **Data:** Data folder contains a sample of 500 data points per label for each label. It will also have a breakdown of the dataset used in this experiment and a definition for anomalous data.
 - **GAN:** GAN folder contains the model's architecture and training code. The read me file shows generated samples that the GAN and WGAN generators have created and the theory behind GAN and WGAN.
-- **Generated Samples:** Generated samples contain examples of generators of each label for both GAN and WGAN.
+- **Experiments:** Experiments contain the results of the experiments and the different interpretations of it.
 - **Graphs and Plots** Contains all figures, graphs and plots from experiments. Pretty self-explanatory... LOL
 - **Obtain Data Scripts:** Shows the scripts needed to use the RGBD Camera and obtain the datapoints. The process of data processing will also be explained in the read me file.
 
