@@ -46,4 +46,4 @@ detection and localization,” arXiv preprint arXiv:2112.09045, 2021.
 
 ___
 ### Acknowledgements
-A special thanks to to Professor Daisuke Iwai and Professor Sato for their constant stewardship and supervision through out this project
+A special thanks to to Professor Daisuke Iwai and Professor Kosuke Sato for their constant stewardship and supervision through out this project
